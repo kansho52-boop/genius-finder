@@ -6,18 +6,20 @@
 <title>GENIUS FINDER</title>
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --border: #333;
-    --text: #f0f0f0;
-    --sub: #888;
-    --accent: #c8a96e;
-    --accent2: #7eb8c8;
+    --bg: #100b1a;
+    --surface: #1c1428;
+    --surface2: #271c38;
+    --border: #3a2c4d;
+    --text: #f5f0ff;
+    --sub: #a396bd;
+    --accent: #ffb84d;
+    --accent2: #7ee8d8;
+    --pop: #ff6b9d;
+    --pop2: #ffd166;
     --green: #6ec89a;
-    --danger: #c86e6e;
-    --radius: 12px;
-    --radius-sm: 8px;
+    --danger: #ff6b7a;
+    --radius: 16px;
+    --radius-sm: 10px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -55,14 +57,18 @@
   h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
   .sub-text { color: var(--sub); font-size: 13px; margin-bottom: 24px; }
   .humor {
-    background: var(--surface2);
-    border-left: 3px solid var(--accent);
+    background: linear-gradient(135deg, rgba(255,107,157,0.12), rgba(255,209,102,0.10));
+    border: 1px dashed rgba(255,184,77,0.5);
     padding: 12px 16px;
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    border-radius: var(--radius-sm);
     font-size: 13px;
-    color: var(--sub);
+    color: var(--text);
     margin-bottom: 20px;
-    font-style: italic;
+    position: relative;
+  }
+  .humor::before {
+    content: '💬';
+    margin-right: 6px;
   }
 
   /* ── ボタン ── */
@@ -79,7 +85,7 @@
     text-align: center;
   }
   .btn:active { opacity: 0.7; }
-  .btn-primary { background: var(--accent); color: #111; }
+  .btn-primary { background: linear-gradient(135deg, var(--pop), var(--accent)); color: #1a0f10; box-shadow: 0 6px 16px rgba(255,107,157,0.25); }
   .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
   .btn-ghost { background: transparent; color: var(--sub); font-size: 13px; padding: 10px; }
   .btn + .btn { margin-top: 10px; }
@@ -109,7 +115,7 @@
   .start-visual {
     width: 100%;
     height: 180px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffb84d 50%, #7ee8d8 100%);
     border-radius: var(--radius);
     display: flex;
     align-items: center;
@@ -119,10 +125,10 @@
     overflow: hidden;
   }
   .start-visual::after {
-    content: '✦';
+    content: '✨';
     font-size: 64px;
-    color: var(--accent);
-    opacity: 0.3;
+    opacity: 0.85;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
   }
   .start-visual-text {
     position: absolute;
@@ -421,9 +427,9 @@
 
   /* ── SCREEN 7: 今日の発見カード ── */
   .genius-card {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, #2a1a3e 0%, #1c1428 100%);
     border: 1px solid var(--accent);
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 28px 24px;
     margin-bottom: 24px;
     position: relative;
@@ -433,8 +439,16 @@
     content: '';
     position: absolute;
     top: -40px; right: -40px;
-    width: 120px; height: 120px;
-    background: radial-gradient(circle, rgba(200,169,110,0.15), transparent 70%);
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(255,107,157,0.22), transparent 70%);
+    border-radius: 50%;
+  }
+  .genius-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -30px;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(126,232,216,0.18), transparent 70%);
     border-radius: 50%;
   }
   .card-eyebrow {
@@ -516,15 +530,15 @@
 <!-- ===== SCREEN 0: APIキー設定 ===== -->
 <div class="screen active" id="screen-api">
   <br>
-  <p class="tagline">SETUP</p>
-  <h1>APIキーを入力してください</h1>
-  <p class="sub-text">Anthropic APIキーを入力して体験を開始します。<br>キーはこのページ内のみで使用されます。</p>
+  <p class="tagline">🔑 SETUP</p>
+  <h1>まずは、カギをどうぞ</h1>
+  <p class="sub-text">Anthropic APIキーを入れると、扉が開きます。<br>このページの中だけで使う、ここだけの秘密です。</p>
   <div class="field">
     <label>Anthropic API Key</label>
     <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off">
-    <div class="api-note">※ このキーはブラウザ外に送信されません</div>
+    <div class="api-note">※ どこにも送信しません。約束します。</div>
   </div>
-  <button class="btn btn-primary" onclick="startWithKey()">開始する</button>
+  <button class="btn btn-primary" onclick="startWithKey()">とびらを開ける</button>
 </div>
 
 <!-- ===== SCREEN 1: スタート ===== -->
@@ -532,12 +546,12 @@
   <div class="start-visual">
     <div class="start-visual-text">GENIUS FINDER v0.1</div>
   </div>
-  <p class="tagline">才能を証明する場所ではありません。</p>
-  <h1>変なところを<br>拾う場所です。</h1>
-  <p class="sub-text" style="margin-top:8px">アートを見て、感じて、描く。その小さな反応から、自分でも知らなかった自分に出会う体験です。</p>
-  <div class="humor">「正解は存在しません。もし出てきたら、それはAIの勘違いです。」</div>
+  <p class="tagline">✨ ようこそ、GENIUS FINDERへ</p>
+  <h1>才能を証明する<br>場所ではありません。<br>変なところを拾う場所です。</h1>
+  <p class="sub-text" style="margin-top:8px">アートを見て、感じて、描く。その小さな反応から、自分でもまだ会ったことのない自分に出会いにいきます。</p>
+  <div class="humor">正解は存在しません。もし出てきたら、それはAIの勘違いです。</div>
   <div class="field">
-    <label>ニックネーム（なんでも）</label>
+    <label>呼び名（なんでもOK）</label>
     <input type="text" id="nickname" placeholder="例：たろう、みどり、謎の人...">
   </div>
   <div class="consent-item">
@@ -546,21 +560,21 @@
   </div>
   <div class="consent-item">
     <input type="checkbox" id="consent2">
-    <label for="consent2">この体験は診断ではなく、仮説の提示であることを理解しました</label>
+    <label for="consent2">これは診断ではなく「仮説」です。信じすぎず、疑いすぎず。</label>
   </div>
   <br>
-  <button class="btn btn-primary" onclick="goToArtSelect()">体験をはじめる</button>
+  <button class="btn btn-primary" onclick="goToArtSelect()">冒険をはじめる</button>
 </div>
 
 <!-- ===== SCREEN 2: アート選択 ===== -->
 <div class="screen" id="screen-art">
-  <h2>直感で選んでください</h2>
-  <p class="sub-text">9作品から、気になる3つを選んでください。<br>好きじゃなくても「なぜか気になる」でOKです。</p>
-  <div class="humor">「迷った作品も、あなたをチラ見しています。」</div>
+  <h2>🎨 ビビッときた3つは？</h2>
+  <p class="sub-text">9作品の中から、気になる3つをタップ。<br>「好き」じゃなくても「なぜか気になる」で全然OKです。</p>
+  <div class="humor">迷った作品も、あなたをチラ見しています。</div>
   <div class="select-count">選択中：<span id="select-count">0</span> / 3</div>
   <div class="art-grid" id="art-grid"></div>
-  <button class="btn btn-primary" id="btn-art-next" onclick="goToReflection()" disabled>この3作品で進む</button>
-  <button class="btn btn-ghost" onclick="clearSelection()">選択をリセット</button>
+  <button class="btn btn-primary" id="btn-art-next" onclick="goToReflection()" disabled>この3つでいく！</button>
+  <button class="btn btn-ghost" onclick="clearSelection()">やっぱり選び直す</button>
 </div>
 
 <!-- アート拡大モーダル -->
@@ -571,8 +585,8 @@
 
 <!-- ===== SCREEN 3: 言語化 ===== -->
 <div class="screen" id="screen-reflection">
-  <h2>感じたことを教えてください</h2>
-  <p class="sub-text">選んだ3作品について、直感で答えてください。</p>
+  <h2>💭 感じたこと、正直に教えて</h2>
+  <p class="sub-text">選んだ3作品について、深く考えずに答えてください。<br>一瞬で出てきた言葉ほど、たぶん当たっています。</p>
   <div class="selected-arts-row" id="selected-arts-row"></div>
 
   <div class="question-block">
@@ -612,38 +626,43 @@
   </div>
 
   <div class="question-block">
-    <div class="question-label">Q5. 今の生活に持ち帰りたい要素は？</div>
+    <div class="question-label">Q5. この作品に妙なタイトルをつけるなら？<br><small style="color:var(--sub);font-weight:400">まじめじゃなくていいです。むしろ変な方が歓迎。</small></div>
+    <textarea id="answer-title" placeholder="例：会議を救う宇宙人、怒っているプリン..."></textarea>
+  </div>
+
+  <div class="question-block">
+    <div class="question-label">Q6. 今の生活に持ち帰りたい要素は？</div>
     <textarea id="answer-takeaway" placeholder="例：この色、この静けさ、この混沌..."></textarea>
   </div>
 
-  <button class="btn btn-primary" onclick="goToTheme()">次へ：創作テーマを受け取る</button>
+  <button class="btn btn-primary" onclick="goToTheme()">テーマを受け取りに行く</button>
 </div>
 
 <!-- ===== SCREEN 4: テーマ生成 ===== -->
 <div class="screen" id="screen-theme">
-  <h2>あなたへのテーマ</h2>
-  <p class="sub-text">回答をもとに、AIが3つのテーマを提案します。<br>一番ピンときたものを選んでください。</p>
+  <h2>🎁 あなただけのお題、届きました</h2>
+  <p class="sub-text">回答をもとに、AIが3つのテーマをひねり出しました。<br>一番ピンときたものを選んでください。</p>
   <div id="loading-theme">
     <div class="spinner"></div>
-    テーマを考え中...
+    AIが唸りながら考え中...
   </div>
   <div id="theme-cards" style="display:none"></div>
-  <button class="btn btn-primary" id="btn-theme-next" onclick="goToCreate()" style="display:none">このテーマで描く</button>
-  <button class="btn btn-ghost" id="btn-theme-random" onclick="loadThemes()" style="display:none">別のテーマを出す</button>
+  <button class="btn btn-primary" id="btn-theme-next" onclick="goToCreate()" style="display:none">これで描いてみる</button>
+  <button class="btn btn-ghost" id="btn-theme-random" onclick="loadThemes()" style="display:none">気分じゃない、別のを出して</button>
 </div>
 
 <!-- ===== SCREEN 5: 創作 ===== -->
 <div class="screen" id="screen-create">
-  <h2>描いてください</h2>
+  <h2>✏️ さあ、描いてみよう</h2>
   <div id="selected-theme-display" style="background:var(--surface2);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
     <div style="font-size:11px;color:var(--accent);letter-spacing:0.1em;margin-bottom:4px">テーマ</div>
     <div id="theme-text-display" style="font-size:18px;font-weight:700"></div>
   </div>
-  <p class="sub-text">紙に描いて、撮影してアップロードしてください。<br>うまく描けなくても、むしろ情報量は多い。</p>
-  <div class="humor">「白紙も作品です。ただし撮影するとスマホが"机"を作品だと思うことがあります。」</div>
+  <p class="sub-text">紙に描いて、撮影してアップロードしてください。<br>うまく描けたらすごい。うまく描けなくても、むしろ情報量は多い。</p>
+  <div class="humor">白紙も作品です。ただし撮影するとスマホが"机"を作品だと思うことがあります。</div>
 
   <div class="timer-display" id="timer-display">5:00</div>
-  <div class="timer-label">タイマー（任意）</div>
+  <div class="timer-label">タイマー（使っても使わなくても）</div>
   <div style="display:flex;gap:8px;margin-bottom:20px">
     <button class="btn btn-secondary" style="flex:1;padding:10px" onclick="startTimer()">▶ スタート</button>
     <button class="btn btn-secondary" style="flex:1;padding:10px" onclick="resetTimer()">↺ リセット</button>
@@ -652,7 +671,7 @@
   <img id="preview-img" alt="アップロードされた作品">
   <div class="upload-area" onclick="document.getElementById('upload-input').click()">
     <div class="upload-icon">📷</div>
-    <p>作品を撮影・アップロード</p>
+    <p>撮れたら見せてください</p>
     <p style="font-size:12px;margin-top:4px">タップしてカメラまたはアルバムを選択</p>
   </div>
   <input type="file" id="upload-input" accept="image/*" capture="environment" onchange="handleUpload(event)">
@@ -662,7 +681,7 @@
     <textarea id="answer-selflike" placeholder="どこでも、一言でも。"></textarea>
   </div>
 
-  <button class="btn btn-primary" id="btn-create-next" onclick="goToHypothesis()">AIの仮説を見る</button>
+  <button class="btn btn-primary" id="btn-create-next" onclick="goToHypothesis()">AIの言い分、聞いてみる</button>
 </div>
 
 <!-- ===== SCREEN 6: AI仮説 ===== -->
@@ -670,44 +689,44 @@
   <div id="loading-hypothesis">
     <br><br>
     <div class="spinner"></div>
-    <div class="loading-text">あなたの反応を読み解いています...<br><br>
-    「AIがそれっぽいことを言っています。<br>違ったら遠慮なく赤ペン先生を。」</div>
+    <div class="loading-text">あなたの反応、じっくり読み解いてます...<br><br>
+    AIがそれっぽいことを言おうとしています。<br>違ったら遠慮なく赤ペン先生を。</div>
   </div>
   <div id="hypothesis-content" style="display:none">
-    <h2>あなたらしさの仮説</h2>
-    <p class="sub-text">AIによる仮説です。違ったら修正してください。</p>
+    <h2>🔍 AIが見つけた、あなたのカケラ</h2>
+    <p class="sub-text">あくまで仮説です。違ったら遠慮なくツッコんでください。</p>
     <div class="hypothesis-box" id="hyp-box"></div>
 
-    <h2 style="margin-bottom:12px">これは自分に当てはまりますか？</h2>
+    <h2 style="margin-bottom:12px">これ、当たってる？</h2>
     <div class="reaction-row">
       <div class="reaction-btn agree" onclick="selectReaction('agree', this)">
         <span class="icon">✓</span>
-        <span>しっくりくる</span>
+        <span>たしかに！</span>
       </div>
       <div class="reaction-btn pending" onclick="selectReaction('pending', this)">
         <span class="icon">？</span>
-        <span>保留</span>
+        <span>うーん、保留</span>
       </div>
       <div class="reaction-btn disagree" onclick="selectReaction('disagree', this)">
         <span class="icon">✗</span>
-        <span>違う</span>
+        <span>いや違う</span>
       </div>
     </div>
 
     <div id="reaction-note" style="display:none;margin-bottom:20px">
       <div class="field">
         <label id="reaction-label">どのあたりが違いますか？</label>
-        <textarea id="reaction-text" placeholder="自由に書いてください"></textarea>
+        <textarea id="reaction-text" placeholder="遠慮なく赤ペン先生をどうぞ"></textarea>
       </div>
     </div>
 
-    <button class="btn btn-primary" onclick="goToCard()">今日の発見カードへ</button>
+    <button class="btn btn-primary" onclick="goToCard()">カードを受け取りに行く</button>
   </div>
 </div>
 
 <!-- ===== SCREEN 7: 発見カード ===== -->
 <div class="screen" id="screen-card">
-  <h2>今日の発見</h2>
+  <h2>🎉 今日のあなた、できました</h2>
   <p class="sub-text">あなたのGENIUS、いったん仮置きしました。<br>持ち逃げOKです。</p>
   <div class="genius-card" id="genius-card">
     <div class="card-eyebrow">MY GENIUS CARD — v0.1</div>
@@ -725,13 +744,25 @@
       <div class="card-row-value" id="card-moves"></div>
     </div>
     <div class="card-row">
+      <div class="card-row-label">ENERGY SOURCE — 火がつく条件</div>
+      <div class="card-row-value" id="card-energy-source"></div>
+    </div>
+    <div class="card-row">
+      <div class="card-row-label">ENERGY LEAK — しぼむ条件</div>
+      <div class="card-row-value" id="card-energy-leak"></div>
+    </div>
+    <div class="card-row">
+      <div class="card-row-label">ODD CHARM — 妙な魅力</div>
+      <div class="card-row-value" id="card-odd-charm"></div>
+    </div>
+    <div class="card-row">
       <div class="card-row-label">CURRENT QUEST — 今試したいこと</div>
       <div class="card-row-value" id="card-quest"></div>
     </div>
     <div class="card-version" id="card-date"></div>
   </div>
-  <p class="share-note">スクリーンショットで保存・共有できます</p>
-  <button class="btn btn-secondary" onclick="resetAll()">もう一度体験する</button>
+  <p class="share-note">スクショで保存・自慢してOKです</p>
+  <button class="btn btn-secondary" onclick="resetAll()">もう一回、遊んでみる</button>
 </div>
 
 <script>
@@ -866,7 +897,7 @@ const artworks = [
 
 // ===== 画面遷移ユーティリティ =====
 const screens = ['screen-api','screen-start','screen-art','screen-reflection','screen-theme','screen-create','screen-hypothesis','screen-card'];
-const stepLabels = ['','','作品を選ぶ','感じたことを話す','テーマを受け取る','描く','仮説を確認','発見カード'];
+const stepLabels = ['','','ビビッとくる3つ','感じたこと語る','お題を受け取る','描いてみる','AIの言い分','発見カード'];
 const progressMap = [0, 5, 20, 40, 55, 65, 80, 100];
 
 function showScreen(id) {
@@ -882,7 +913,7 @@ function showScreen(id) {
 function startWithKey() {
   const key = document.getElementById('api-key-input').value.trim();
   if (!key.startsWith('sk-')) {
-    alert('有効なAPIキーを入力してください（sk- から始まります）');
+    alert('あれ、キーの形が違うかも？（sk- から始まるやつです）');
     return;
   }
   state.apiKey = key;
@@ -892,9 +923,9 @@ function startWithKey() {
 // ===== SCREEN 1: スタート =====
 function goToArtSelect() {
   const nickname = document.getElementById('nickname').value.trim();
-  if (!nickname) { alert('ニックネームを入力してください'); return; }
+  if (!nickname) { alert('呼び名がないと呼べません！教えてください'); return; }
   if (!document.getElementById('consent1').checked || !document.getElementById('consent2').checked) {
-    alert('同意事項をご確認ください');
+    alert('2つのチェック、お忘れなく');
     return;
   }
   state.nickname = nickname;
@@ -991,6 +1022,7 @@ async function goToTheme() {
     mood: getSelectedTags('tags-mood'),
     why: document.getElementById('answer-why').value,
     action: document.getElementById('answer-action').value,
+    title: document.getElementById('answer-title').value,
     takeaway: document.getElementById('answer-takeaway').value,
   };
   showScreen('screen-theme');
@@ -1006,24 +1038,27 @@ async function loadThemes() {
 
   const prompt = `
 あなたはGENIUS FINDERのAIです。ユーザーのアートへの反応を元に、創作テーマを3つ提案してください。
+口調・世界観：温かく、少しズレていて、面白がる。堅苦しい教育的な言い回しは禁止。本人・作品を笑いの対象にはしない。
 
 ## ユーザーの回答
 - 最初に目が行ったもの: ${state.reflectionData.focus.join('、') || '未回答'}
 - 気分: ${state.reflectionData.mood.join('、') || '未回答'}
 - なぜ惹かれたか: ${state.reflectionData.why || '未回答'}
 - 作品の中で何をするか: ${state.reflectionData.action || '未回答'}
+- つけた妙なタイトル: ${state.reflectionData.title || '未回答'}
 - 持ち帰りたい要素: ${state.reflectionData.takeaway || '未回答'}
 
 ## 出力形式（JSON）
 {
   "themes": [
-    {"title": "テーマ名（10文字以内）", "hint": "補足説明（20文字以内）"},
+    {"title": "テーマ名（10文字以内）", "hint": "補足説明（20文字以内、ちょっと遊び心のある言い方で）"},
     {"title": "テーマ名", "hint": "補足説明"},
     {"title": "テーマ名", "hint": "補足説明"}
   ]
 }
 
 テーマは具体的で創作意欲が湧くものにしてください。「描いてみよう」ではなく「〇〇」のような名詞・概念で。
+3つのうち少なくとも1つは、ユーモラスで意外性のあるテーマにしてください（例：「怒っているプリン」「会議を救う宇宙人」のような肩の力が抜けるもの）。
 JSONのみ返してください。`;
 
   try {
@@ -1035,7 +1070,7 @@ JSONのみ返してください。`;
     renderThemes([
       { title: '境界線', hint: 'あなたが感じた「ここまで」と「ここから」' },
       { title: '停止した瞬間', hint: '動きが止まる前の、あの一秒' },
-      { title: '名前のない感情', hint: 'まだ言葉になっていないもの' },
+      { title: '怒っている置物', hint: '普段は黙っているものが、ついにキレた図' },
     ]);
   }
 }
@@ -1121,16 +1156,21 @@ async function goToHypothesis() {
 async function generateHypothesis() {
   const selectedArtTitles = state.selectedArts.map(id => artworks.find(a => a.id === id).title);
 
-  const systemPrompt = `あなたはGENIUS FINDERのAIコーチです。
+  const systemPrompt = `あなたはGENIUS FINDERのAIコーチです。親しみやすく、少しズレていて、押しつけがましくない先生のような存在。
 ユーザーのアートへの反応・言語化・創作から、その人固有のWants・Being・Geniusを仮説として提示します。
+
+口調のルール（重要）：
+- 「〜と考えられます」「〜と推察されます」のような硬い言い回しは禁止。「〜かも」「〜っぽい」「〜な気がする」くらいの、友達に話すようなくだけた温かさで
+- 一文は短く、テンポよく。説教くさくしない
+- 気の利いた比喩やちょっとした遊び心をどこかに1つは入れる
+- ただし本人・作品・属性を笑いの対象にしない。ユーモアは「緊張をゆるめる」ためだけに使う
 
 原則：
 - 断定しない。「〜かもしれません」「〜という傾向が見えます」という仮説形式で
 - 根拠を必ず示す（どの回答・選択から読み取ったか）
 - 「あなたは〇〇型です」と固定ラベルを貼らない
 - 弱みを強みに無理やり変換しない
-- 診断・病名・性格タイプに言及しない
-- 温かく、少しユーモアがある口調`;
+- 診断・病名・性格タイプ・発達特性・知能・政治宗教等のセンシティブ属性には一切言及しない`;
 
   const userPrompt = `
 以下のユーザーデータから、GENIUS仮説を生成してください。
@@ -1143,6 +1183,7 @@ ${selectedArtTitles.join('、')}
 - 気分: ${state.reflectionData.mood?.join('、') || '未回答'}
 - なぜ惹かれたか: ${state.reflectionData.why || '未回答'}
 - 作品の中でする行動: ${state.reflectionData.action || '未回答'}
+- つけた妙なタイトル: ${state.reflectionData.title || '未回答'}
 - 持ち帰りたい要素: ${state.reflectionData.takeaway || '未回答'}
 
 ## 創作
@@ -1152,10 +1193,13 @@ ${selectedArtTitles.join('、')}
 ## 出力形式（JSON）
 {
   "geniusName": "あなたらしさを表す一言（動詞を含む15文字以内のフレーズ）",
-  "hypothesis": "2〜3文で仮説を説明",
+  "hypothesis": "2〜3文で仮説を説明。友達に話すくらいのくだけたトーンで",
   "wants": "内側から求めていること（1〜2文）",
   "being": "自然でいられる状態・条件（1〜2文）",
   "geniusMoves": ["動詞フレーズ1", "動詞フレーズ2", "動詞フレーズ3"],
+  "energySource": "火がつく条件・シチュエーション（1文）",
+  "energyLeak": "しぼむ条件・環境。欠点ではなく「合わない環境」として書く（1文）",
+  "oddCharm": "本人らしい妙な魅力やユーモラスな一面（1文、思わずクスッとするように）",
   "quest": "今日から試せる小さな行動（1文）",
   "evidence": ["根拠1（どの回答から）", "根拠2", "根拠3"]
 }
@@ -1183,10 +1227,13 @@ JSONのみ返してください。`;
     // フォールバック仮説
     state.hypothesis = {
       geniusName: '形にならないものを形にする人',
-      hypothesis: 'あなたは「まだ言葉になっていないもの」に強く反応する傾向があります。決まった正解より、その手前の余白や可能性を大切にするのかもしれません。',
+      hypothesis: 'あなたは「まだ言葉になっていないもの」に強く反応するタイプっぽいです。決まった正解より、その手前の余白や可能性を大事にしたい人なのかも。',
       wants: '何かをきっちり完成させることより、「途中の状態」に意味を見出したいのかもしれません。',
-      being: '答えを急かされず、自分のペースで探索できるとき、自然でいられる可能性があります。',
+      being: '答えを急かされず、自分のペースで探索できるとき、自然体でいられそうです。',
       geniusMoves: ['余白から始める', '途中に留まる', '名前をつけ直す'],
+      energySource: '「まだ誰も決めていないこと」に出会ったとき、たぶん火がつきます。',
+      energyLeak: '正解を急かされる環境だと、しぼんでしまうかもしれません。',
+      oddCharm: '白紙を渡されても、なぜか一番楽しそうにしているタイプ。',
       quest: '今日、完成させなくていいものを一つ始めてみてください。',
       evidence: ['余白・空間に目が行った選択から', `「${state.selectedTheme}」というテーマへの反応から`, '持ち帰りたい要素の回答から']
     };
@@ -1213,6 +1260,18 @@ function renderHypothesis(h) {
     <div class="hyp-section">
       <div class="hyp-label">GENIUS MOVES</div>
       <div class="hyp-text">${h.geniusMoves.join(' · ')}</div>
+    </div>
+    <div class="hyp-section">
+      <div class="hyp-label">ENERGY SOURCE — 火がつく条件</div>
+      <div class="hyp-text">${h.energySource || ''}</div>
+    </div>
+    <div class="hyp-section">
+      <div class="hyp-label">ENERGY LEAK — しぼむ条件</div>
+      <div class="hyp-text">${h.energyLeak || ''}</div>
+    </div>
+    <div class="hyp-section">
+      <div class="hyp-label">ODD CHARM — 妙な魅力</div>
+      <div class="hyp-text">${h.oddCharm || ''}</div>
     </div>
     <div class="hyp-section">
       <div class="hyp-label">根拠</div>
@@ -1258,6 +1317,9 @@ function goToCard() {
   document.getElementById('card-wants').textContent = h.wants;
   document.getElementById('card-being').textContent = h.being;
   document.getElementById('card-moves').textContent = h.geniusMoves.join(' · ');
+  document.getElementById('card-energy-source').textContent = h.energySource || '';
+  document.getElementById('card-energy-leak').textContent = h.energyLeak || '';
+  document.getElementById('card-odd-charm').textContent = h.oddCharm || '';
 
   let quest = h.quest;
   if (state.reaction === 'disagree' && state.reactionNote) {
@@ -1316,9 +1378,14 @@ function resetAll() {
   document.getElementById('preview-img').style.display = 'none';
   document.getElementById('preview-img').src = '';
   document.getElementById('upload-input').value = '';
+  document.getElementById('answer-why').value = '';
+  document.getElementById('answer-action').value = '';
+  document.getElementById('answer-title').value = '';
+  document.getElementById('answer-takeaway').value = '';
   document.getElementById('answer-selflike').value = '';
   document.getElementById('reaction-text').value = '';
   document.getElementById('reaction-note').style.display = 'none';
+  document.querySelectorAll('.emotion-tag.selected').forEach(el => el.classList.remove('selected'));
   resetTimer();
   showScreen('screen-start');
 }
