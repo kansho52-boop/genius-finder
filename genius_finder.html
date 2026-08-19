@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>GENIUS FINDER</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #333;
+    --text: #f0f0f0;
+    --sub: #888;
+    --accent: #c8a96e;
+    --accent2: #7eb8c8;
+    --green: #6ec89a;
+    --danger: #c86e6e;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── ヘッダー ── */
+  .header {
+    padding: 20px 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .step-indicator {
+    font-size: 12px;
+    color: var(--sub);
+  }
+
+  /* ── 画面共通 ── */
+  .screen { display: none; padding: 24px 20px 40px; max-width: 480px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  h1 { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 8px; }
+  h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+  .sub-text { color: var(--sub); font-size: 13px; margin-bottom: 24px; }
+  .humor {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px;
+    color: var(--sub);
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  /* ── ボタン ── */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    border-radius: var(--radius);
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    text-align: center;
+  }
+  .btn:active { opacity: 0.7; }
+  .btn-primary { background: var(--accent); color: #111; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost { background: transparent; color: var(--sub); font-size: 13px; padding: 10px; }
+  .btn + .btn { margin-top: 10px; }
+
+  /* ── フォーム ── */
+  input[type="text"], input[type="password"], textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 15px;
+    padding: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+  label { display: block; font-size: 13px; color: var(--sub); margin-bottom: 6px; }
+  .field { margin-bottom: 20px; }
+
+  /* ── SCREEN 0: APIキー設定 ── */
+  .api-note { font-size: 12px; color: var(--sub); margin-top: 6px; }
+
+  /* ── SCREEN 1: スタート ── */
+  .start-visual {
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .start-visual::after {
+    content: '✦';
+    font-size: 64px;
+    color: var(--accent);
+    opacity: 0.3;
+  }
+  .start-visual-text {
+    position: absolute;
+    bottom: 16px;
+    left: 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.15em;
+  }
+  .tagline {
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  /* ── SCREEN 2: アート選択 ── */
+  .art-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .art-item {
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.15s, transform 0.1s;
+  }
+  .art-item img, .art-item svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .art-thumb svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .modal-img svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: var(--radius);
+  }
+  .art-item.selected {
+    border-color: var(--accent);
+    transform: scale(0.96);
+  }
+  .art-item .check {
+    display: none;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+  }
+  .art-item.selected .check { display: flex; }
+  .art-item .num {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #111;
+  }
+  .select-count {
+    text-align: center;
+    color: var(--sub);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .select-count span { color: var(--accent); font-weight: 700; }
+
+  /* アート拡大モーダル */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-img {
+    max-width: 90vw;
+    max-height: 80vh;
+    width: 320px;
+    height: 320px;
+    border-radius: var(--radius);
+    object-fit: contain;
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 28px;
+    color: white;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  /* ── SCREEN 3: 言語化 ── */
+  .selected-arts-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .selected-arts-row .art-thumb {
+    width: 72px;
+    height: 72px;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .question-block {
+    margin-bottom: 24px;
+  }
+  .question-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .emotion-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .emotion-tag {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--sub);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .emotion-tag.selected {
+    background: var(--accent);
+    color: #111;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── SCREEN 4: テーマ生成 ── */
+  .theme-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .theme-card.selected { border-color: var(--accent); }
+  .theme-card .theme-label { font-size: 11px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 6px; }
+  .theme-card .theme-text { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .theme-card .theme-hint { font-size: 12px; color: var(--sub); }
+  #loading-theme {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--sub);
+    font-size: 14px;
+  }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── SCREEN 5: 創作 ── */
+  .timer-display {
+    text-align: center;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 16px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-label { text-align: center; font-size: 13px; color: var(--sub); margin-bottom: 20px; }
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    margin-bottom: 16px;
+  }
+  .upload-area:hover { border-color: var(--accent); }
+  .upload-area .upload-icon { font-size: 36px; margin-bottom: 10px; }
+  .upload-area p { font-size: 14px; color: var(--sub); }
+  #upload-input { display: none; }
+  #preview-img {
+    width: 100%;
+    border-radius: var(--radius);
+    display: none;
+    margin-bottom: 16px;
+    max-height: 300px;
+    object-fit: cover;
+  }
+
+  /* ── SCREEN 6: AI仮説 ── */
+  #loading-hypothesis {
+    text-align: center;
+    padding: 60px 0;
+  }
+  .loading-text { color: var(--sub); font-size: 14px; margin-top: 12px; }
+  .hypothesis-box {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .hyp-section { margin-bottom: 20px; }
+  .hyp-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .hyp-name {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .hyp-text { font-size: 14px; line-height: 1.7; color: var(--text); }
+  .evidence-list { margin-top: 10px; }
+  .evidence-item {
+    font-size: 12px;
+    color: var(--sub);
+    padding: 4px 0;
+    padding-left: 12px;
+    position: relative;
+  }
+  .evidence-item::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+  .reaction-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .reaction-btn {
+    flex: 1;
+    padding: 14px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .reaction-btn.agree { border-color: var(--green); color: var(--green); }
+  .reaction-btn.disagree { border-color: var(--danger); color: var(--danger); }
+  .reaction-btn.pending { border-color: var(--accent2); color: var(--accent2); }
+  .reaction-btn.selected { background: currentColor; }
+  .reaction-btn.selected span { color: #111; }
+  .reaction-btn .icon { display: block; font-size: 20px; margin-bottom: 4px; }
+
+  /* ── SCREEN 7: 今日の発見カード ── */
+  .genius-card {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .genius-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(200,169,110,0.15), transparent 70%);
+    border-radius: 50%;
+  }
+  .card-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .card-genius-name {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 20px;
+    color: #fff;
+  }
+  .card-row { margin-bottom: 14px; }
+  .card-row-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .card-row-value { font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.5; }
+  .card-version {
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.2);
+  }
+  .share-note { text-align: center; font-size: 13px; color: var(--sub); margin-bottom: 20px; }
+
+  /* ── プログレスバー ── */
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    margin: 16px 20px 0;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  /* ── 同意チェック ── */
+  .consent-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+  }
+  .consent-item input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .consent-item label { font-size: 13px; color: var(--sub); margin: 0; }
+</style>
+</head>
+<body>
+
+<!-- プログレスバー -->
+<div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+<!-- ヘッダー -->
+<div class="header">
+  <div class="logo">GENIUS FINDER</div>
+  <div class="step-indicator" id="step-label"></div>
+</div>
+
+<!-- ===== SCREEN 0: APIキー設定 ===== -->
+<div class="screen active" id="screen-api">
+  <br>
+  <p class="tagline">SETUP</p>
+  <h1>APIキーを入力してください</h1>
+  <p class="sub-text">Anthropic APIキーを入力して体験を開始します。<br>キーはこのページ内のみで使用されます。</p>
+  <div class="field">
+    <label>Anthropic API Key</label>
+    <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off">
+    <div class="api-note">※ このキーはブラウザ外に送信されません</div>
+  </div>
+  <button class="btn btn-primary" onclick="startWithKey()">開始する</button>
+</div>
+
+<!-- ===== SCREEN 1: スタート ===== -->
+<div class="screen" id="screen-start">
+  <div class="start-visual">
+    <div class="start-visual-text">GENIUS FINDER v0.1</div>
+  </div>
+  <p class="tagline">才能を証明する場所ではありません。</p>
+  <h1>変なところを<br>拾う場所です。</h1>
+  <p class="sub-text" style="margin-top:8px">アートを見て、感じて、描く。その小さな反応から、自分でも知らなかった自分に出会う体験です。</p>
+  <div class="humor">「正解は存在しません。もし出てきたら、それはAIの勘違いです。」</div>
+  <div class="field">
+    <label>ニックネーム（なんでも）</label>
+    <input type="text" id="nickname" placeholder="例：たろう、みどり、謎の人...">
+  </div>
+  <div class="consent-item">
+    <input type="checkbox" id="consent1">
+    <label for="consent1">AIがアートへの反応と回答を分析することに同意します</label>
+  </div>
+  <div class="consent-item">
+    <input type="checkbox" id="consent2">
+    <label for="consent2">この体験は診断ではなく、仮説の提示であることを理解しました</label>
+  </div>
+  <br>
+  <button class="btn btn-primary" onclick="goToArtSelect()">体験をはじめる</button>
+</div>
+
+<!-- ===== SCREEN 2: アート選択 ===== -->
+<div class="screen" id="screen-art">
+  <h2>直感で選んでください</h2>
+  <p class="sub-text">9作品から、気になる3つを選んでください。<br>好きじゃなくても「なぜか気になる」でOKです。</p>
+  <div class="humor">「迷った作品も、あなたをチラ見しています。」</div>
+  <div class="select-count">選択中：<span id="select-count">0</span> / 3</div>
+  <div class="art-grid" id="art-grid"></div>
+  <button class="btn btn-primary" id="btn-art-next" onclick="goToReflection()" disabled>この3作品で進む</button>
+  <button class="btn btn-ghost" onclick="clearSelection()">選択をリセット</button>
+</div>
+
+<!-- アート拡大モーダル -->
+<div class="modal-overlay" id="art-modal" onclick="closeModal()">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <div class="modal-img" id="modal-img"></div>
+</div>
+
+<!-- ===== SCREEN 3: 言語化 ===== -->
+<div class="screen" id="screen-reflection">
+  <h2>感じたことを教えてください</h2>
+  <p class="sub-text">選んだ3作品について、直感で答えてください。</p>
+  <div class="selected-arts-row" id="selected-arts-row"></div>
+
+  <div class="question-block">
+    <div class="question-label">Q1. 最初に目が行ったのはどんな要素？</div>
+    <div class="emotion-tags" id="tags-focus">
+      <div class="emotion-tag" onclick="toggleTag(this)">色・明暗</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">線・形</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">人物・顔</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">余白・空間</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">動き・流れ</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">細部・テクスチャ</div>
+    </div>
+  </div>
+
+  <div class="question-block">
+    <div class="question-label">Q2. どんな気分になった？（複数選択OK）</div>
+    <div class="emotion-tags" id="tags-mood">
+      <div class="emotion-tag" onclick="toggleTag(this)">落ち着く</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">ざわざわする</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">懐かしい</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">引き込まれる</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">謎めいている</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">エネルギーを感じる</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">悲しい</div>
+      <div class="emotion-tag" onclick="toggleTag(this)">面白い・笑える</div>
+    </div>
+  </div>
+
+  <div class="question-block">
+    <div class="question-label">Q3. なぜ惹かれたと思う？<br><small style="color:var(--sub);font-weight:400">正解は作者も知りません。</small></div>
+    <textarea id="answer-why" placeholder="直感でどうぞ。一言でも。"></textarea>
+  </div>
+
+  <div class="question-block">
+    <div class="question-label">Q4. この作品の中に入るなら、何をする？</div>
+    <textarea id="answer-action" placeholder="例：ただ座っている、誰かを探す、走る..."></textarea>
+  </div>
+
+  <div class="question-block">
+    <div class="question-label">Q5. 今の生活に持ち帰りたい要素は？</div>
+    <textarea id="answer-takeaway" placeholder="例：この色、この静けさ、この混沌..."></textarea>
+  </div>
+
+  <button class="btn btn-primary" onclick="goToTheme()">次へ：創作テーマを受け取る</button>
+</div>
+
+<!-- ===== SCREEN 4: テーマ生成 ===== -->
+<div class="screen" id="screen-theme">
+  <h2>あなたへのテーマ</h2>
+  <p class="sub-text">回答をもとに、AIが3つのテーマを提案します。<br>一番ピンときたものを選んでください。</p>
+  <div id="loading-theme">
+    <div class="spinner"></div>
+    テーマを考え中...
+  </div>
+  <div id="theme-cards" style="display:none"></div>
+  <button class="btn btn-primary" id="btn-theme-next" onclick="goToCreate()" style="display:none">このテーマで描く</button>
+  <button class="btn btn-ghost" id="btn-theme-random" onclick="loadThemes()" style="display:none">別のテーマを出す</button>
+</div>
+
+<!-- ===== SCREEN 5: 創作 ===== -->
+<div class="screen" id="screen-create">
+  <h2>描いてください</h2>
+  <div id="selected-theme-display" style="background:var(--surface2);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
+    <div style="font-size:11px;color:var(--accent);letter-spacing:0.1em;margin-bottom:4px">テーマ</div>
+    <div id="theme-text-display" style="font-size:18px;font-weight:700"></div>
+  </div>
+  <p class="sub-text">紙に描いて、撮影してアップロードしてください。<br>うまく描けなくても、むしろ情報量は多い。</p>
+  <div class="humor">「白紙も作品です。ただし撮影するとスマホが"机"を作品だと思うことがあります。」</div>
+
+  <div class="timer-display" id="timer-display">5:00</div>
+  <div class="timer-label">タイマー（任意）</div>
+  <div style="display:flex;gap:8px;margin-bottom:20px">
+    <button class="btn btn-secondary" style="flex:1;padding:10px" onclick="startTimer()">▶ スタート</button>
+    <button class="btn btn-secondary" style="flex:1;padding:10px" onclick="resetTimer()">↺ リセット</button>
+  </div>
+
+  <img id="preview-img" alt="アップロードされた作品">
+  <div class="upload-area" onclick="document.getElementById('upload-input').click()">
+    <div class="upload-icon">📷</div>
+    <p>作品を撮影・アップロード</p>
+    <p style="font-size:12px;margin-top:4px">タップしてカメラまたはアルバムを選択</p>
+  </div>
+  <input type="file" id="upload-input" accept="image/*" capture="environment" onchange="handleUpload(event)">
+
+  <div class="question-block" style="margin-top:16px">
+    <div class="question-label">描き終えて：一番「自分っぽい」と思う部分は？</div>
+    <textarea id="answer-selflike" placeholder="どこでも、一言でも。"></textarea>
+  </div>
+
+  <button class="btn btn-primary" id="btn-create-next" onclick="goToHypothesis()">AIの仮説を見る</button>
+</div>
+
+<!-- ===== SCREEN 6: AI仮説 ===== -->
+<div class="screen" id="screen-hypothesis">
+  <div id="loading-hypothesis">
+    <br><br>
+    <div class="spinner"></div>
+    <div class="loading-text">あなたの反応を読み解いています...<br><br>
+    「AIがそれっぽいことを言っています。<br>違ったら遠慮なく赤ペン先生を。」</div>
+  </div>
+  <div id="hypothesis-content" style="display:none">
+    <h2>あなたらしさの仮説</h2>
+    <p class="sub-text">AIによる仮説です。違ったら修正してください。</p>
+    <div class="hypothesis-box" id="hyp-box"></div>
+
+    <h2 style="margin-bottom:12px">これは自分に当てはまりますか？</h2>
+    <div class="reaction-row">
+      <div class="reaction-btn agree" onclick="selectReaction('agree', this)">
+        <span class="icon">✓</span>
+        <span>しっくりくる</span>
+      </div>
+      <div class="reaction-btn pending" onclick="selectReaction('pending', this)">
+        <span class="icon">？</span>
+        <span>保留</span>
+      </div>
+      <div class="reaction-btn disagree" onclick="selectReaction('disagree', this)">
+        <span class="icon">✗</span>
+        <span>違う</span>
+      </div>
+    </div>
+
+    <div id="reaction-note" style="display:none;margin-bottom:20px">
+      <div class="field">
+        <label id="reaction-label">どのあたりが違いますか？</label>
+        <textarea id="reaction-text" placeholder="自由に書いてください"></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="goToCard()">今日の発見カードへ</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN 7: 発見カード ===== -->
+<div class="screen" id="screen-card">
+  <h2>今日の発見</h2>
+  <p class="sub-text">あなたのGENIUS、いったん仮置きしました。<br>持ち逃げOKです。</p>
+  <div class="genius-card" id="genius-card">
+    <div class="card-eyebrow">MY GENIUS CARD — v0.1</div>
+    <div class="card-genius-name" id="card-name"></div>
+    <div class="card-row">
+      <div class="card-row-label">WANTS — 内側から求めていること</div>
+      <div class="card-row-value" id="card-wants"></div>
+    </div>
+    <div class="card-row">
+      <div class="card-row-label">BEING — 自然でいられる状態</div>
+      <div class="card-row-value" id="card-being"></div>
+    </div>
+    <div class="card-row">
+      <div class="card-row-label">GENIUS MOVES — あなたの生み出し方</div>
+      <div class="card-row-value" id="card-moves"></div>
+    </div>
+    <div class="card-row">
+      <div class="card-row-label">CURRENT QUEST — 今試したいこと</div>
+      <div class="card-row-value" id="card-quest"></div>
+    </div>
+    <div class="card-version" id="card-date"></div>
+  </div>
+  <p class="share-note">スクリーンショットで保存・共有できます</p>
+  <button class="btn btn-secondary" onclick="resetAll()">もう一度体験する</button>
+</div>
+
+<script>
+// ===== 状態管理 =====
+const state = {
+  apiKey: '',
+  nickname: '',
+  selectedArts: [],
+  reflectionData: {},
+  selectedTheme: '',
+  uploadedImage: null,
+  hypothesis: null,
+  reaction: '',
+  reactionNote: ''
+};
+
+let timerInterval = null;
+let timerSeconds = 300;
+
+// ===== アート作品データ =====
+// ※ジーニアスの実際の利用者作品URLに差し替えてください
+// ===== アート作品データ =====
+// svgはプレースホルダー。実際のジーニアス作品に差し替える場合は
+// src を画像のURL（同じサーバー上）またはbase64データURLに変更してください。
+// SVGをインラインで埋め込むことでCORSの問題を回避しています。
+const artworks = [
+  {
+    id: 1, title: '作品 A',
+    svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="#1a0a2e"/>
+      <circle cx="100" cy="80" r="50" fill="none" stroke="#c8a96e" stroke-width="2" opacity="0.6"/>
+      <circle cx="100" cy="80" r="30" fill="#c8a96e" opacity="0.15"/>
+      <circle cx="100" cy="80" r="10" fill="#c8a96e" opacity="0.5"/>
+      <line x1="50" y1="160" x2="150" y2="160" stroke="#c8a96e" stroke-width="1" opacity="0.3"/>
+      <text x="100" y="185" text-anchor="middle" fill="#c8a96e" font-size="10" opacity="0.4">A</text>
+    </svg>`
+  },
+  {
+    id: 2, title: '作品 B',
+    svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="#0a1a2e"/>
+      <path d="M0,140 Q50,80 100,120 Q150,160 200,100" fill="none" stroke="#7eb8c8" stroke-width="3"/>
+      <path d="M0,160 Q50,100 100,140 Q150,180 200,120" fill="none" stroke="#7eb8c8" stroke-width="2" opacity="0.5"/>
+      <circle cx="30" cy="40" r="20" fill="#7eb8c8" opacity="0.2"/>
+      <circle cx="170" cy="30" r="12" fill="#fff" opacity="0.1"/>
+      <text x="100" y="185" text-anchor="middle" fill="#7eb8c8" font-size="10" opacity="0.4">B</text>
+    </svg>`
+  },
+  {
+    id: 3, title: '作品 C',
+    svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="#1a1a0a"/>
+      <rect x="20" y="20" width="70" height="70" fill="#6ec89a" opacity="0.3" rx="4"/>
+      <rect x="110" y="20" width="70" height="70" fill="#c86e6e" opacity="0.3" rx="4"/>
+      <rect x="20" y="110" width="70" height="70" fill="#c8a96e" opacity="0.3" rx="4"/>
+      <rect x="110" y="110" width="70" height="70" fill="#7eb8c8" opacity="0.3" rx="4"/>
+      <text x="100" y="105" text-anchor="middle" fill="#fff" font-size="10" opacity="0.2">C</text>
+    </svg>`
+  },
+  {
+    id: 4, title: '作品 D',
+    svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="#0f0f1a"/>
+      <line x1="10" y1="100" x2="190" y2="100" stroke="#444" stroke-width="1"/>
+      <line x1="100" y1="10" x2="100" y2="190" stroke="#444" stroke-width="1"/>
+      <path d="M40,160 L100,40 L160,160" fill="none" stroke="#c8a96e" stroke-width="2"/>
+      <circle cx="100" cy="40" r="5" fill="#c8a96e"/>
+      <text x="100" y="185" text-anchor="middle" fill="#c8a96e" font-size="10" opacity="0.4">D</text>
+    </svg>`
+  },
+  {
+    id: 5, title: '作品 E',
+    svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="#1a0f0f"/>
+      <circle cx="100" cy="100" r="80" fill="none" stroke="#c86e6e" stroke-width="1" opacity="0.4"/>
+      <circle cx="100" cy="100" r="55" fill="none" stroke="#c86e6e" stroke-width="1" opacity="0.3"/>
+      <circle cx="100" cy="100" r="30" fill="#c86e6e" opacity="0.15"/>
+      <path d="M100,20 L120,80 L180,80 L130,120 L150,180 L100,140 L50,180 L70,120 L20,80 L80,80 Z" fill="#c8a96e" opacity="0.2"/>
+      <text x="100" y="105" text-anchor="middle" fill="#c86e6e" font-size="10" opacity="0.3">E</text>
+    </svg>`
+  },
+  {
+    id: 6, title: '作品 F',
+    svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="#0a0a0a"/>
+      <line x1="0" y1="0" x2="200" y2="200" stroke="#333" stroke-width="1"/>
+      <line x1="200" y1="0" x2="0" y2="200" stroke="#333" stroke-width="1"/>
+      <rect x="60" y="60" width="80" height="80" fill="none" stroke="#fff" stroke-width="2" opacity="0.5"/>
+      <rect x="80" y="80" width="40" height="40" fill="#fff" opacity="0.1"/>
+      <text x="100" y="105" text-anchor="middle" fill="#fff" font-size="10" opacity="0.2">F</text>
+    </svg>`
+  },
+  {
+    id: 7, title: '作品 G',
+    svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="#0f1a0f"/>
+      <path d="M20,180 Q60,60 100,100 Q140,140 180,20" fill="none" stroke="#6ec89a" stroke-width="3"/>
+      <path d="M20,160 Q70,80 100,100 Q130,120 180,40" fill="none" stroke="#6ec89a" stroke-width="1" opacity="0.4"/>
+      <circle cx="100" cy="100" r="8" fill="#6ec89a" opacity="0.6"/>
+      <text x="100" y="185" text-anchor="middle" fill="#6ec89a" font-size="10" opacity="0.4">G</text>
+    </svg>`
+  },
+  {
+    id: 8, title: '作品 H',
+    svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gH" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#c8a96e" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#1a1a1a" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="200" height="200" fill="#111"/>
+      <rect width="200" height="200" fill="url(#gH)"/>
+      <rect x="30" y="70" width="140" height="3" fill="#c8a96e" opacity="0.5"/>
+      <rect x="50" y="90" width="100" height="2" fill="#c8a96e" opacity="0.3"/>
+      <rect x="70" y="106" width="60" height="1" fill="#c8a96e" opacity="0.2"/>
+      <text x="100" y="150" text-anchor="middle" fill="#c8a96e" font-size="10" opacity="0.3">H</text>
+    </svg>`
+  },
+  {
+    id: 9, title: '作品 I',
+    svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="#1a1020"/>
+      <ellipse cx="100" cy="90" rx="60" ry="70" fill="none" stroke="#c8a96e" stroke-width="1" opacity="0.4"/>
+      <ellipse cx="100" cy="90" rx="40" ry="50" fill="none" stroke="#7eb8c8" stroke-width="1" opacity="0.4"/>
+      <ellipse cx="100" cy="90" rx="20" ry="30" fill="#c8a96e" opacity="0.1"/>
+      <line x1="40" y1="160" x2="160" y2="160" stroke="#888" stroke-width="1" opacity="0.3"/>
+      <text x="100" y="185" text-anchor="middle" fill="#c8a96e" font-size="10" opacity="0.4">I</text>
+    </svg>`
+  },
+];
+
+// ===== 画面遷移ユーティリティ =====
+const screens = ['screen-api','screen-start','screen-art','screen-reflection','screen-theme','screen-create','screen-hypothesis','screen-card'];
+const stepLabels = ['','','作品を選ぶ','感じたことを話す','テーマを受け取る','描く','仮説を確認','発見カード'];
+const progressMap = [0, 5, 20, 40, 55, 65, 80, 100];
+
+function showScreen(id) {
+  screens.forEach(s => document.getElementById(s).classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = screens.indexOf(id);
+  document.getElementById('step-label').textContent = stepLabels[idx] || '';
+  document.getElementById('progress-fill').style.width = progressMap[idx] + '%';
+  window.scrollTo(0, 0);
+}
+
+// ===== SCREEN 0: APIキー =====
+function startWithKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-')) {
+    alert('有効なAPIキーを入力してください（sk- から始まります）');
+    return;
+  }
+  state.apiKey = key;
+  showScreen('screen-start');
+}
+
+// ===== SCREEN 1: スタート =====
+function goToArtSelect() {
+  const nickname = document.getElementById('nickname').value.trim();
+  if (!nickname) { alert('ニックネームを入力してください'); return; }
+  if (!document.getElementById('consent1').checked || !document.getElementById('consent2').checked) {
+    alert('同意事項をご確認ください');
+    return;
+  }
+  state.nickname = nickname;
+  renderArtGrid();
+  showScreen('screen-art');
+}
+
+// ===== SCREEN 2: アート選択 =====
+function renderArtGrid() {
+  const grid = document.getElementById('art-grid');
+  grid.innerHTML = artworks.map(art => `
+    <div class="art-item" id="art-${art.id}" onclick="toggleArt(${art.id})" oncontextmenu="openModal(${art.id});return false;">
+      ${art.svg}
+      <div class="check">✓</div>
+    </div>
+  `).join('');
+}
+
+function toggleArt(id) {
+  const el = document.getElementById('art-' + id);
+  const idx = state.selectedArts.indexOf(id);
+  if (idx === -1) {
+    if (state.selectedArts.length >= 3) return;
+    state.selectedArts.push(id);
+    el.classList.add('selected');
+    // 番号表示
+    const num = document.createElement('div');
+    num.className = 'num';
+    num.textContent = state.selectedArts.length;
+    num.id = 'num-' + id;
+    el.appendChild(num);
+  } else {
+    state.selectedArts.splice(idx, 1);
+    el.classList.remove('selected');
+    const numEl = document.getElementById('num-' + id);
+    if (numEl) numEl.remove();
+    // 番号を振り直す
+    state.selectedArts.forEach((sid, i) => {
+      const n = document.getElementById('num-' + sid);
+      if (n) n.textContent = i + 1;
+    });
+  }
+  document.getElementById('select-count').textContent = state.selectedArts.length;
+  document.getElementById('btn-art-next').disabled = state.selectedArts.length !== 3;
+}
+
+function clearSelection() {
+  state.selectedArts.forEach(id => {
+    document.getElementById('art-' + id).classList.remove('selected');
+    const n = document.getElementById('num-' + id);
+    if (n) n.remove();
+  });
+  state.selectedArts = [];
+  document.getElementById('select-count').textContent = '0';
+  document.getElementById('btn-art-next').disabled = true;
+}
+
+function openModal(id) {
+  const art = artworks.find(a => a.id === id);
+  if (!art) return;
+  const container = document.getElementById('modal-img');
+  container.innerHTML = art.svg;
+  document.getElementById('art-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('art-modal').classList.remove('open');
+}
+
+// ===== SCREEN 3: 言語化 =====
+function goToReflection() {
+  if (state.selectedArts.length !== 3) return;
+  // 選択作品サムネ表示
+  const row = document.getElementById('selected-arts-row');
+  row.innerHTML = state.selectedArts.map(id => {
+    const art = artworks.find(a => a.id === id);
+    return `<div class="art-thumb">${art.svg}</div>`;
+  }).join('');
+  showScreen('screen-reflection');
+}
+
+function toggleTag(el) {
+  el.classList.toggle('selected');
+}
+
+function getSelectedTags(containerId) {
+  return Array.from(document.querySelectorAll(`#${containerId} .emotion-tag.selected`))
+    .map(el => el.textContent);
+}
+
+// ===== SCREEN 4: テーマ生成 =====
+async function goToTheme() {
+  state.reflectionData = {
+    focus: getSelectedTags('tags-focus'),
+    mood: getSelectedTags('tags-mood'),
+    why: document.getElementById('answer-why').value,
+    action: document.getElementById('answer-action').value,
+    takeaway: document.getElementById('answer-takeaway').value,
+  };
+  showScreen('screen-theme');
+  await loadThemes();
+}
+
+async function loadThemes() {
+  document.getElementById('loading-theme').style.display = 'block';
+  document.getElementById('theme-cards').style.display = 'none';
+  document.getElementById('btn-theme-next').style.display = 'none';
+  document.getElementById('btn-theme-random').style.display = 'none';
+  state.selectedTheme = '';
+
+  const prompt = `
+あなたはGENIUS FINDERのAIです。ユーザーのアートへの反応を元に、創作テーマを3つ提案してください。
+
+## ユーザーの回答
+- 最初に目が行ったもの: ${state.reflectionData.focus.join('、') || '未回答'}
+- 気分: ${state.reflectionData.mood.join('、') || '未回答'}
+- なぜ惹かれたか: ${state.reflectionData.why || '未回答'}
+- 作品の中で何をするか: ${state.reflectionData.action || '未回答'}
+- 持ち帰りたい要素: ${state.reflectionData.takeaway || '未回答'}
+
+## 出力形式（JSON）
+{
+  "themes": [
+    {"title": "テーマ名（10文字以内）", "hint": "補足説明（20文字以内）"},
+    {"title": "テーマ名", "hint": "補足説明"},
+    {"title": "テーマ名", "hint": "補足説明"}
+  ]
+}
+
+テーマは具体的で創作意欲が湧くものにしてください。「描いてみよう」ではなく「〇〇」のような名詞・概念で。
+JSONのみ返してください。`;
+
+  try {
+    const res = await callClaude(prompt, false);
+    const json = JSON.parse(res.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim());
+    renderThemes(json.themes);
+  } catch(e) {
+    // フォールバック
+    renderThemes([
+      { title: '境界線', hint: 'あなたが感じた「ここまで」と「ここから」' },
+      { title: '停止した瞬間', hint: '動きが止まる前の、あの一秒' },
+      { title: '名前のない感情', hint: 'まだ言葉になっていないもの' },
+    ]);
+  }
+}
+
+function renderThemes(themes) {
+  document.getElementById('loading-theme').style.display = 'none';
+  const container = document.getElementById('theme-cards');
+  container.innerHTML = themes.map((t, i) => `
+    <div class="theme-card" id="theme-${i}" onclick="selectTheme(${i}, '${t.title.replace(/'/g,"\\'")}', this)">
+      <div class="theme-label">THEME ${String.fromCharCode(65+i)}</div>
+      <div class="theme-text">${t.title}</div>
+      <div class="theme-hint">${t.hint}</div>
+    </div>
+  `).join('');
+  container.style.display = 'block';
+  document.getElementById('btn-theme-random').style.display = 'block';
+}
+
+function selectTheme(idx, title, el) {
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selectedTheme = title;
+  document.getElementById('btn-theme-next').style.display = 'block';
+}
+
+// ===== SCREEN 5: 創作 =====
+function goToCreate() {
+  if (!state.selectedTheme) { alert('テーマを選んでください'); return; }
+  document.getElementById('theme-text-display').textContent = state.selectedTheme;
+  resetTimer();
+  showScreen('screen-create');
+}
+
+// タイマー
+function startTimer() {
+  if (timerInterval) return;
+  timerInterval = setInterval(() => {
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      return;
+    }
+    timerSeconds--;
+    updateTimerDisplay();
+  }, 1000);
+}
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerSeconds = 300;
+  updateTimerDisplay();
+}
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60);
+  const s = timerSeconds % 60;
+  document.getElementById('timer-display').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+// 画像アップロード
+function handleUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    state.uploadedImage = e.target.result; // base64
+    const preview = document.getElementById('preview-img');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ===== SCREEN 6: AI仮説 =====
+async function goToHypothesis() {
+  state.reflectionData.selflike = document.getElementById('answer-selflike').value;
+  showScreen('screen-hypothesis');
+  document.getElementById('loading-hypothesis').style.display = 'block';
+  document.getElementById('hypothesis-content').style.display = 'none';
+
+  await generateHypothesis();
+}
+
+async function generateHypothesis() {
+  const selectedArtTitles = state.selectedArts.map(id => artworks.find(a => a.id === id).title);
+
+  const systemPrompt = `あなたはGENIUS FINDERのAIコーチです。
+ユーザーのアートへの反応・言語化・創作から、その人固有のWants・Being・Geniusを仮説として提示します。
+
+原則：
+- 断定しない。「〜かもしれません」「〜という傾向が見えます」という仮説形式で
+- 根拠を必ず示す（どの回答・選択から読み取ったか）
+- 「あなたは〇〇型です」と固定ラベルを貼らない
+- 弱みを強みに無理やり変換しない
+- 診断・病名・性格タイプに言及しない
+- 温かく、少しユーモアがある口調`;
+
+  const userPrompt = `
+以下のユーザーデータから、GENIUS仮説を生成してください。
+
+## 選んだ作品
+${selectedArtTitles.join('、')}
+
+## アートへの反応
+- 目が行ったもの: ${state.reflectionData.focus?.join('、') || '未回答'}
+- 気分: ${state.reflectionData.mood?.join('、') || '未回答'}
+- なぜ惹かれたか: ${state.reflectionData.why || '未回答'}
+- 作品の中でする行動: ${state.reflectionData.action || '未回答'}
+- 持ち帰りたい要素: ${state.reflectionData.takeaway || '未回答'}
+
+## 創作
+- テーマ: ${state.selectedTheme}
+- 一番自分っぽい部分: ${state.reflectionData.selflike || '未回答'}
+
+## 出力形式（JSON）
+{
+  "geniusName": "あなたらしさを表す一言（動詞を含む15文字以内のフレーズ）",
+  "hypothesis": "2〜3文で仮説を説明",
+  "wants": "内側から求めていること（1〜2文）",
+  "being": "自然でいられる状態・条件（1〜2文）",
+  "geniusMoves": ["動詞フレーズ1", "動詞フレーズ2", "動詞フレーズ3"],
+  "quest": "今日から試せる小さな行動（1文）",
+  "evidence": ["根拠1（どの回答から）", "根拠2", "根拠3"]
+}
+
+JSONのみ返してください。`;
+
+  try {
+    let content;
+    if (state.uploadedImage) {
+      // 画像あり：vision対応
+      content = [
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: state.uploadedImage.split(',')[1] } },
+        { type: 'text', text: userPrompt }
+      ];
+    } else {
+      content = userPrompt;
+    }
+
+    const res = await callClaude(userPrompt, true, systemPrompt, content);
+    const json = JSON.parse(res.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim());
+    state.hypothesis = json;
+    renderHypothesis(json);
+  } catch(e) {
+    console.error(e);
+    // フォールバック仮説
+    state.hypothesis = {
+      geniusName: '形にならないものを形にする人',
+      hypothesis: 'あなたは「まだ言葉になっていないもの」に強く反応する傾向があります。決まった正解より、その手前の余白や可能性を大切にするのかもしれません。',
+      wants: '何かをきっちり完成させることより、「途中の状態」に意味を見出したいのかもしれません。',
+      being: '答えを急かされず、自分のペースで探索できるとき、自然でいられる可能性があります。',
+      geniusMoves: ['余白から始める', '途中に留まる', '名前をつけ直す'],
+      quest: '今日、完成させなくていいものを一つ始めてみてください。',
+      evidence: ['余白・空間に目が行った選択から', `「${state.selectedTheme}」というテーマへの反応から`, '持ち帰りたい要素の回答から']
+    };
+    renderHypothesis(state.hypothesis);
+  }
+}
+
+function renderHypothesis(h) {
+  const box = document.getElementById('hyp-box');
+  box.innerHTML = `
+    <div class="hyp-section">
+      <div class="hyp-label">GENIUS NAME</div>
+      <div class="hyp-name">${h.geniusName}</div>
+      <div class="hyp-text">${h.hypothesis}</div>
+    </div>
+    <div class="hyp-section">
+      <div class="hyp-label">WANTS — 内側から求めていること</div>
+      <div class="hyp-text">${h.wants}</div>
+    </div>
+    <div class="hyp-section">
+      <div class="hyp-label">BEING — 自然でいられる状態</div>
+      <div class="hyp-text">${h.being}</div>
+    </div>
+    <div class="hyp-section">
+      <div class="hyp-label">GENIUS MOVES</div>
+      <div class="hyp-text">${h.geniusMoves.join(' · ')}</div>
+    </div>
+    <div class="hyp-section">
+      <div class="hyp-label">根拠</div>
+      <div class="evidence-list">
+        ${h.evidence.map(e => `<div class="evidence-item">${e}</div>`).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('loading-hypothesis').style.display = 'none';
+  document.getElementById('hypothesis-content').style.display = 'block';
+}
+
+function selectReaction(type, el) {
+  document.querySelectorAll('.reaction-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.style.background = '';
+    const sp = b.querySelector('span:last-child');
+    if(sp) sp.style.color = '';
+  });
+  el.classList.add('selected');
+  el.style.background = '';
+  state.reaction = type;
+  const note = document.getElementById('reaction-note');
+  const lbl = document.getElementById('reaction-label');
+  if (type === 'disagree') {
+    note.style.display = 'block';
+    lbl.textContent = 'どのあたりが違いますか？（カードに反映します）';
+  } else if (type === 'pending') {
+    note.style.display = 'block';
+    lbl.textContent = 'どの部分が引っかかりますか？（任意）';
+  } else {
+    note.style.display = 'none';
+  }
+}
+
+// ===== SCREEN 7: 発見カード =====
+function goToCard() {
+  state.reactionNote = document.getElementById('reaction-text').value;
+  const h = state.hypothesis;
+  if (!h) return;
+
+  document.getElementById('card-name').textContent = h.geniusName;
+  document.getElementById('card-wants').textContent = h.wants;
+  document.getElementById('card-being').textContent = h.being;
+  document.getElementById('card-moves').textContent = h.geniusMoves.join(' · ');
+
+  let quest = h.quest;
+  if (state.reaction === 'disagree' && state.reactionNote) {
+    quest += `\n（あなたの修正：${state.reactionNote}）`;
+  }
+  document.getElementById('card-quest').textContent = quest;
+
+  const now = new Date();
+  document.getElementById('card-date').textContent = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} — ${state.nickname}`;
+
+  showScreen('screen-card');
+}
+
+// ===== Claude API呼び出し =====
+async function callClaude(prompt, useSystem = false, systemPrompt = '', content = null) {
+  const body = {
+    model: 'claude-sonnet-4-5',
+    max_tokens: 1024,
+    messages: [{
+      role: 'user',
+      content: content || prompt
+    }]
+  };
+  if (useSystem && systemPrompt) {
+    body.system = systemPrompt;
+  }
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': state.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || 'API error');
+  }
+  const data = await res.json();
+  return data.content[0].text;
+}
+
+// ===== リセット =====
+function resetAll() {
+  state.selectedArts = [];
+  state.reflectionData = {};
+  state.selectedTheme = '';
+  state.uploadedImage = null;
+  state.hypothesis = null;
+  state.reaction = '';
+  state.reactionNote = '';
+  document.getElementById('preview-img').style.display = 'none';
+  document.getElementById('preview-img').src = '';
+  document.getElementById('upload-input').value = '';
+  document.getElementById('answer-selflike').value = '';
+  document.getElementById('reaction-text').value = '';
+  document.getElementById('reaction-note').style.display = 'none';
+  resetTimer();
+  showScreen('screen-start');
+}
+</script>
+</body>
+</html>
