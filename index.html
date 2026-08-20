@@ -256,6 +256,26 @@
   }
 
   /* ── SCREEN 3: 言語化 ── */
+  .focus-art-display {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 2px solid var(--accent);
+  }
+  .focus-art-display img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .other-arts-label {
+    font-size: 11px;
+    color: var(--sub);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
   .selected-arts-row {
     display: flex;
     gap: 8px;
@@ -576,7 +596,7 @@
   <div class="humor">迷った作品も、あなたをチラ見しています。</div>
   <div class="select-count">選択中：<span id="select-count">0</span> / 3</div>
   <div class="art-grid" id="art-grid"></div>
-  <button class="btn btn-primary" id="btn-art-next" onclick="goToReflection()" disabled>この3つでいく！</button>
+  <button class="btn btn-primary" id="btn-art-next" onclick="goToFocus()" disabled>この3つでいく！</button>
   <button class="btn btn-ghost" onclick="clearSelection()">やっぱり選び直す</button>
 </div>
 
@@ -586,10 +606,20 @@
   <div class="modal-img" id="modal-img"></div>
 </div>
 
+<!-- ===== SCREEN 2.5: 気になる1枚 ===== -->
+<div class="screen" id="screen-focus">
+  <h2>🔎 一番気になるのはどれ？</h2>
+  <p class="sub-text">3つとも良い勝負ですが、ここから先はこの1枚を深掘りします。<br>残り2つは参考として覚えておきます。</p>
+  <div class="art-grid" id="focus-grid" style="grid-template-columns:repeat(3,1fr)"></div>
+  <button class="btn btn-primary" id="btn-focus-next" onclick="goToReflection()" disabled>これでいく！</button>
+</div>
+
 <!-- ===== SCREEN 3: 言語化 ===== -->
 <div class="screen" id="screen-reflection">
   <h2>💭 感じたこと、正直に教えて</h2>
-  <p class="sub-text">選んだ3作品について、深く考えずに答えてください。<br>一瞬で出てきた言葉ほど、たぶん当たっています。</p>
+  <p class="sub-text">この1枚について、深く考えずに答えてください。<br>一瞬で出てきた言葉ほど、たぶん当たっています。</p>
+  <div class="focus-art-display" id="focus-art-display"></div>
+  <p class="other-arts-label">他に気になった作品</p>
   <div class="selected-arts-row" id="selected-arts-row"></div>
 
   <div class="question-block">
@@ -774,6 +804,7 @@ const state = {
   apiKey: '',
   nickname: '',
   selectedArts: [],
+  focusArt: null,
   reflectionData: {},
   selectedTheme: '',
   uploadedImage: null,
@@ -799,9 +830,9 @@ const artworks = [
 ];
 
 // ===== 画面遷移ユーティリティ =====
-const screens = ['screen-api','screen-start','screen-art','screen-reflection','screen-theme','screen-create','screen-hypothesis','screen-card'];
-const stepLabels = ['','','ビビッとくる3つ','感じたこと語る','お題を受け取る','描いてみる','仮説をチェック','発見カード'];
-const progressMap = [0, 5, 20, 40, 55, 65, 80, 100];
+const screens = ['screen-api','screen-start','screen-art','screen-focus','screen-reflection','screen-theme','screen-create','screen-hypothesis','screen-card'];
+const stepLabels = ['','','ビビッとくる3つ','気になる1枚','感じたこと語る','お題を受け取る','描いてみる','仮説をチェック','発見カード'];
+const progressMap = [0, 5, 15, 25, 45, 60, 70, 85, 100];
 
 function showScreen(id) {
   screens.forEach(s => document.getElementById(s).classList.remove('active'));
@@ -897,15 +928,43 @@ function closeModal() {
   document.getElementById('art-modal').classList.remove('open');
 }
 
+// ===== SCREEN 2.5: 気になる1枚 =====
+function goToFocus() {
+  if (state.selectedArts.length !== 3) return;
+  state.focusArt = null;
+  const grid = document.getElementById('focus-grid');
+  grid.innerHTML = state.selectedArts.map(id => {
+    const art = artworks.find(a => a.id === id);
+    return `<div class="art-item" id="focus-${id}" onclick="pickFocus(${id})">
+      <img src="${art.src}" alt="${art.title}">
+      <div class="check">✓</div>
+    </div>`;
+  }).join('');
+  document.getElementById('btn-focus-next').disabled = true;
+  showScreen('screen-focus');
+}
+
+function pickFocus(id) {
+  state.focusArt = id;
+  state.selectedArts.forEach(sid => {
+    document.getElementById('focus-' + sid).classList.toggle('selected', sid === id);
+  });
+  document.getElementById('btn-focus-next').disabled = false;
+}
+
 // ===== SCREEN 3: 言語化 =====
 function goToReflection() {
-  if (state.selectedArts.length !== 3) return;
-  // 選択作品サムネ表示
+  if (!state.focusArt) return;
+  const focus = artworks.find(a => a.id === state.focusArt);
+  document.getElementById('focus-art-display').innerHTML = `<img src="${focus.src}" alt="${focus.title}">`;
+
+  const others = state.selectedArts.filter(id => id !== state.focusArt);
   const row = document.getElementById('selected-arts-row');
-  row.innerHTML = state.selectedArts.map(id => {
+  row.innerHTML = others.map(id => {
     const art = artworks.find(a => a.id === id);
     return `<div class="art-thumb"><img src="${art.src}" alt="${art.title}"></div>`;
   }).join('');
+
   showScreen('screen-reflection');
 }
 
@@ -1057,7 +1116,8 @@ async function goToHypothesis() {
 }
 
 async function generateHypothesis() {
-  const selectedArtTitles = state.selectedArts.map(id => artworks.find(a => a.id === id).title);
+  const focusTitle = artworks.find(a => a.id === state.focusArt)?.title || '';
+  const otherTitles = state.selectedArts.filter(id => id !== state.focusArt).map(id => artworks.find(a => a.id === id).title);
 
   const systemPrompt = `あなたはGENIUS FINDERのAIコーチです。親しみやすく、少しズレていて、押しつけがましくない先生のような存在。
 ユーザーのアートへの反応・言語化・創作から、その人固有のWants・Being・Geniusを仮説として提示します。
@@ -1079,7 +1139,8 @@ async function generateHypothesis() {
 以下のユーザーデータから、GENIUS仮説を生成してください。
 
 ## 選んだ作品
-${selectedArtTitles.join('、')}
+- 一番気になった作品（以下の反応はすべてこの作品について）: ${focusTitle}
+- 他に気になった作品（参考情報）: ${otherTitles.join('、') || 'なし'}
 
 ## アートへの反応
 - 目が行ったもの: ${state.reflectionData.focus?.join('、') || '未回答'}
@@ -1272,6 +1333,7 @@ async function callClaude(prompt, useSystem = false, systemPrompt = '', content 
 // ===== リセット =====
 function resetAll() {
   state.selectedArts = [];
+  state.focusArt = null;
   state.reflectionData = {};
   state.selectedTheme = '';
   state.uploadedImage = null;
